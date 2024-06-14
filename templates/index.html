@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Prediction</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .result-container {
+            margin: 20px auto;
+            max-width: 80%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .result-container:hover {
+            transform: scale(1.05); /* Perbesar frame saat mouse hover */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .zoomable-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+        }
+
+        .zoomable-img:hover {
+            transform: scale(1.2); /* Perbesar gambar saat mouse hover */
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container">
+        <h1 class="text-center my-5">Breast Cancer Prediction</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form id="image-form" action="/predict" method="post" enctype="multipart/form-data" class="bg-white p-4 shadow rounded">
+                    <div class="form-group">
+                        <label for="image">Upload an image:</label>
+                        <input type="file" class="form-control-file" id="image" name="image" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Predict</button>
+                </form>
+            </div>
+        </div>
+        <div id="result" class="mt-5"></div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Handle form submission and display result
+        document.getElementById('image-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
+
+                // Create a container for the result
+                var resultContainer = document.createElement('div');
+                resultContainer.classList.add('result-container', 'bg-white', 'p-4', 'shadow', 'rounded');
+
+                // Add prediction text
+                var predictionText = document.createElement('h2');
+                predictionText.textContent = 'Prediction: ' + data.result;
+                resultContainer.appendChild(predictionText);
+
+                // Add the image with zoom effect
+                var zoomableImg = document.createElement('img');
+                zoomableImg.src = data.image;
+                zoomableImg.alt = 'Predicted Image';
+                zoomableImg.classList.add('zoomable-img', 'img-fluid', 'rounded');
+                resultContainer.appendChild(zoomableImg);
+
+                // Append result container to resultDiv
+                resultDiv.appendChild(resultContainer);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
